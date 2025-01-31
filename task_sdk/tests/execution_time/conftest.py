@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING
-from unittest import mock
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -40,14 +39,6 @@ def disable_capturing():
     sys.stderr = sys.__stderr__
     yield
     sys.stdin, sys.stdout, sys.stderr = old_in, old_out, old_err
-
-
-@pytest.fixture
-def mock_supervisor_comms():
-    with mock.patch(
-        "airflow.sdk.execution_time.task_runner.SUPERVISOR_COMMS", create=True
-    ) as supervisor_comms:
-        yield supervisor_comms
 
 
 @pytest.fixture
@@ -80,10 +71,15 @@ def mocked_parse(spy_agency):
         from airflow.utils import timezone
 
         dag = DAG(dag_id=dag_id, start_date=timezone.datetime(2024, 12, 3))
+        if what.ti_context.dag_run.conf:
+            dag.params = what.ti_context.dag_run.conf  # type: ignore[assignment]
         task.dag = dag
         t = dag.task_dict[task.task_id]
         ti = RuntimeTaskInstance.model_construct(
-            **what.ti.model_dump(exclude_unset=True), task=t, _ti_context_from_server=what.ti_context
+            **what.ti.model_dump(exclude_unset=True),
+            task=t,
+            _ti_context_from_server=what.ti_context,
+            max_tries=what.ti_context.max_tries,
         )
         spy_agency.spy_on(parse, call_fake=lambda _: ti)
         return ti
@@ -114,7 +110,7 @@ def create_runtime_ti(mocked_parse, make_ti_context):
     from uuid6 import uuid7
 
     from airflow.sdk.api.datamodels._generated import TaskInstance
-    from airflow.sdk.execution_time.comms import StartupDetails
+    from airflow.sdk.execution_time.comms import BundleInfo, StartupDetails
 
     def _create_task_instance(
         task: BaseOperator,
@@ -126,6 +122,7 @@ def create_runtime_ti(mocked_parse, make_ti_context):
         start_date: str | datetime = "2024-12-01T01:00:00Z",
         run_type: str = "manual",
         try_number: int = 1,
+        conf=None,
         ti_id=None,
     ) -> RuntimeTaskInstance:
         if not ti_id:
@@ -139,13 +136,15 @@ def create_runtime_ti(mocked_parse, make_ti_context):
             data_interval_end=data_interval_end,
             start_date=start_date,
             run_type=run_type,
+            conf=conf,
         )
 
         startup_details = StartupDetails(
             ti=TaskInstance(
                 id=ti_id, task_id=task.task_id, dag_id=dag_id, run_id=run_id, try_number=try_number
             ),
-            file="",
+            dag_rel_path="",
+            bundle_info=BundleInfo(name="anything", version="any"),
             requests_fd=0,
             ti_context=ti_context,
         )
