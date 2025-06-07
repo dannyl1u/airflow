@@ -16,8 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Box, type BoxProps } from "@chakra-ui/react";
+import React from "react";
+import { useTranslation } from "react-i18next";
 
-export const DurationAxis = (props: BoxProps) => (
-  <Box borderBottomWidth={1} left={0} position="absolute" right={0} zIndex={0} {...props} />
-);
+import { Dialog } from "src/components/ui";
+
+import LanguageSelector from "./LanguageSelector";
+
+type LanguageModalProps = {
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+};
+
+const LanguageModal: React.FC<LanguageModalProps> = ({ isOpen, onClose }) => {
+  const { t: translate } = useTranslation();
+
+  return (
+    <Dialog.Root lazyMount onOpenChange={onClose} open={isOpen} size="xl">
+      <Dialog.Content backdrop>
+        <Dialog.Header>{translate("selectLanguage")}</Dialog.Header>
+        <Dialog.CloseTrigger />
+        <Dialog.Body>
+          <LanguageSelector />
+        </Dialog.Body>
+      </Dialog.Content>
+    </Dialog.Root>
+  );
+};
+
+export default LanguageModal;
