@@ -470,6 +470,15 @@ def get_provider_info():
                 "how-to-guide": ["/docs/apache-airflow-providers-google/operators/cloud/looker.rst"],
                 "tags": ["gcp"],
             },
+            {
+                "integration-name": "Google Cloud Logging Sink",
+                "external-doc-url": "https://cloud.google.com/logging",
+                "logo": "/docs/integration-logos/Cloud-Logging-Sink.png",
+                "how-to-guide": [
+                    "/docs/apache-airflow-providers-google/operators/cloud/cloud_logging_sink.rst"
+                ],
+                "tags": ["gcp"],
+            },
         ],
         "operators": [
             {
@@ -527,10 +536,6 @@ def get_provider_info():
             {
                 "integration-name": "Google Compute Engine",
                 "python-modules": ["airflow.providers.google.cloud.operators.compute"],
-            },
-            {
-                "integration-name": "Google Data Catalog",
-                "python-modules": ["airflow.providers.google.cloud.operators.datacatalog"],
             },
             {
                 "integration-name": "Google Dataflow",
@@ -693,6 +698,10 @@ def get_provider_info():
             {
                 "integration-name": "Google Cloud Managed Service for Apache Kafka",
                 "python-modules": ["airflow.providers.google.cloud.operators.managed_kafka"],
+            },
+            {
+                "integration-name": "Google Cloud Logging Sink",
+                "python-modules": ["airflow.providers.google.cloud.operators.cloud_logging_sink"],
             },
         ],
         "sensors": [
@@ -864,10 +873,6 @@ def get_provider_info():
                     "airflow.providers.google.cloud.hooks.compute",
                     "airflow.providers.google.cloud.hooks.compute_ssh",
                 ],
-            },
-            {
-                "integration-name": "Google Data Catalog",
-                "python-modules": ["airflow.providers.google.cloud.hooks.datacatalog"],
             },
             {
                 "integration-name": "Google Dataflow",
@@ -1060,6 +1065,10 @@ def get_provider_info():
             {
                 "integration-name": "Google Cloud Managed Service for Apache Kafka",
                 "python-modules": ["airflow.providers.google.cloud.hooks.managed_kafka"],
+            },
+            {
+                "integration-name": "Google Cloud Logging",
+                "python-modules": ["airflow.providers.google.cloud.hooks.cloud_logging"],
             },
         ],
         "triggers": [
@@ -1414,9 +1423,6 @@ def get_provider_info():
             "airflow.providers.google.cloud.links.compute.ComputeInstanceGroupManagerDetailsLink",
             "airflow.providers.google.cloud.links.cloud_tasks.CloudTasksQueueLink",
             "airflow.providers.google.cloud.links.cloud_tasks.CloudTasksLink",
-            "airflow.providers.google.cloud.links.datacatalog.DataCatalogEntryGroupLink",
-            "airflow.providers.google.cloud.links.datacatalog.DataCatalogEntryLink",
-            "airflow.providers.google.cloud.links.datacatalog.DataCatalogTagTemplateLink",
             "airflow.providers.google.cloud.links.dataproc.DataprocLink",
             "airflow.providers.google.cloud.links.dataproc.DataprocListLink",
             "airflow.providers.google.cloud.links.dataproc.DataprocClusterLink",

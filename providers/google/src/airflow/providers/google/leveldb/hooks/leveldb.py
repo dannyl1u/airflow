@@ -18,8 +18,14 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from airflow.exceptions import AirflowException, AirflowOptionalProviderFeatureException
-from airflow.hooks.base import BaseHook
+
+try:
+    from airflow.sdk import BaseHook
+except ImportError:
+    from airflow.hooks.base import BaseHook  # type: ignore[attr-defined,no-redef]
 
 try:
     import plyvel
@@ -45,6 +51,29 @@ class LevelDBHook(BaseHook):
     default_conn_name = "leveldb_default"
     conn_type = "leveldb"
     hook_name = "LevelDB"
+
+    @classmethod
+    def get_connection_form_widgets(cls) -> dict[str, Any]:
+        """Return connection widgets to add to LevelDB connection form."""
+        from flask_babel import lazy_gettext
+        from wtforms import BooleanField
+
+        return {
+            "create_if_missing": BooleanField(
+                lazy_gettext("Create a database if it does not exist"), default=False
+            ),
+            "error_if_exists": BooleanField(
+                lazy_gettext("Raise an exception if the database already exists"), default=False
+            ),
+        }
+
+    @classmethod
+    def get_ui_field_behaviour(cls) -> dict[str, Any]:
+        """Return custom UI field behaviour for LevelDB connection."""
+        return {
+            "hidden_fields": ["login", "password", "schema", "port"],
+            "relabeling": {},
+        }
 
     def __init__(self, leveldb_conn_id: str = default_conn_name):
         super().__init__()
