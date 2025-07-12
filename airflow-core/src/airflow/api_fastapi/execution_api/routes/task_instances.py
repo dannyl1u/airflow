@@ -23,7 +23,7 @@ import json
 from collections import defaultdict
 from collections.abc import Iterator
 from datetime import datetime
-from typing import TYPE_CHECKING, Annotated, Any
+from typing import TYPE_CHECKING, Annotated, Any, cast
 from uuid import UUID
 
 import attrs
@@ -73,6 +73,7 @@ from airflow.utils.state import DagRunState, TaskInstanceState, TerminalTIState
 if TYPE_CHECKING:
     from sqlalchemy.sql.dml import Update
 
+    from airflow.models.expandinput import SchedulerExpandInput
     from airflow.sdk.types import Operator
 
 
@@ -308,9 +309,9 @@ def _get_upstream_map_indexes(
                 mapped_ti_count = upstream_mapped_group.get_parse_time_mapped_ti_count()
             except NotFullyPopulated:
                 # for cases that needs to resolve xcom to get the correct count
-                mapped_ti_count = upstream_mapped_group._expand_input.get_total_map_length(
-                    run_id, session=session
-                )
+                mapped_ti_count = cast(
+                    "SchedulerExpandInput", upstream_mapped_group._expand_input
+                ).get_total_map_length(run_id, session=session)
             map_indexes = list(range(mapped_ti_count)) if mapped_ti_count is not None else None
 
         yield upstream_task.task_id, map_indexes
@@ -899,7 +900,7 @@ def validate_inlets_and_outlets(
     bind_contextvars(ti_id=ti_id_str)
 
     ti = session.scalar(select(TI).where(TI.id == ti_id_str))
-    if not ti or not ti.logical_date:
+    if not ti:
         log.error("Task Instance not found")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
